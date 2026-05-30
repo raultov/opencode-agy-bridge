@@ -77,12 +77,12 @@ Just add the package directly with the desired version tag. OpenCode will downlo
 {
   "plugin": [
     // ...your existing plugins...
-    "opencode-agy-bridge@0.1.0/plugin"
+    "opencode-agy-bridge@0.2.0"
   ],
   "provider": {
     // ...your existing providers...
     "agy": {
-      "npm": "opencode-agy-bridge@0.1.0",
+      "npm": "opencode-agy-bridge@0.2.0/provider",
       "name": "Google Antigravity (via agy CLI)",
       "options": {
         "binary": "agy",
@@ -104,12 +104,12 @@ Just add the package directly with the desired version tag. OpenCode will downlo
 {
   "plugin": [
     // ...your existing plugins...
-    "opencode-agy-bridge/plugin"
+    "opencode-agy-bridge"
   ],
   "provider": {
     // ...your existing providers...
     "agy": {
-      "npm": "opencode-agy-bridge",
+      "npm": "opencode-agy-bridge/provider",
       "name": "Google Antigravity (via agy CLI)",
       "options": {
         "binary": "agy",
@@ -126,7 +126,7 @@ Just add the package directly with the desired version tag. OpenCode will downlo
 ```
 
 > [!NOTE]
-> If OpenCode has trouble resolving the global module name directly, you can replace the module names with their absolute paths pointing to your global `node_modules` folder (e.g., `"/usr/local/lib/node_modules/opencode-agy-bridge/dist/plugin.js"` for the plugin and `"/usr/local/lib/node_modules/opencode-agy-bridge"` for the provider).
+> If OpenCode has trouble resolving the global module name directly, you can replace the module names with their absolute paths pointing to your global `node_modules` folder (e.g., `"/usr/local/lib/node_modules/opencode-agy-bridge/dist/plugin.js"` for the plugin and `"/usr/local/lib/node_modules/opencode-agy-bridge/dist/provider.js"` for the provider).
 
 ### For Local Development / Manual Installation
 
@@ -206,7 +206,7 @@ npm test
 The project includes two GitHub Actions workflows:
 
 - **CI (`ci.yml`):** Runs on push and pull requests to `main` or `master` to compile the project and execute all unit tests using Bun.
-- **Release (`release.yml`):** Runs automatically when a new version tag matching `v*` (e.g., `v0.1.0`) is pushed to the repository. It automatically installs dependencies, builds, tests, and publishes the package to the public npm registry.
+- **Release (`release.yml`):** Runs automatically when a new version tag matching `v*` (e.g., `v0.2.0`) is pushed to the repository. It automatically installs dependencies, builds, tests, and publishes the package to the public npm registry.
 
 Note that both `npm` and `pnpm` share the same public registry (`registry.npmjs.org`), so a single publish step makes the package installable by both package managers.
 
