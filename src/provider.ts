@@ -5,10 +5,10 @@ import type {
   LanguageModelV2StreamPart,
   LanguageModelV2CallWarning,
 } from "@ai-sdk/provider";
-import { runAgy } from "./agy-runner";
-import { snapshot, findNewConversation, defaultConversationsDir } from "./conversation-tracker";
-import { SessionStore } from "./session-store";
-import { flattenPrompt } from "./prompt-mapper";
+import { runAgy } from "./agy-runner.js";
+import { snapshot, findNewConversation, defaultConversationsDir } from "./conversation-tracker.js";
+import { SessionStore } from "./session-store.js";
+import { flattenPrompt } from "./prompt-mapper.js";
 import { randomUUID } from "node:crypto";
 
 export interface AgyProviderOptions {
