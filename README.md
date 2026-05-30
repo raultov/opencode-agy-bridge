@@ -23,9 +23,15 @@ opencode TUI
 
 ## Installation
 
-### 1. Standard Installation (Recommended)
+### 1. Automatic Installation (Recommended)
 
-Install the bridge globally using your preferred package manager:
+If you are using OpenCode's built-in plugin manager, **you do not need to run any commands** in your terminal. OpenCode can automatically fetch and install the package from npm if you specify the package name with its version in your `opencode.json` configuration file.
+
+See the [Configuration](#configuration) section below for details.
+
+### 2. Manual Global Installation
+
+If you prefer to install it globally yourself using a package manager:
 
 ```bash
 # Using npm
@@ -38,7 +44,7 @@ bun install -g opencode-agy-bridge
 pnpm add -g opencode-agy-bridge
 ```
 
-### 2. Manual / Local Development Installation
+### 3. Local Development Installation
 
 If you prefer to build from source:
 
@@ -49,7 +55,7 @@ cd opencode-agy-bridge
 # Using Bun (recommended)
 bun install
 bun run build
-bun test       # verify 42 tests pass
+bun test       # verify all tests pass
 
 # Or using pnpm/npm
 pnpm install && pnpm run build && pnpm test
@@ -63,7 +69,36 @@ pnpm install && pnpm run build && pnpm test
 
 Add the plugin and provider to your `~/.config/opencode/opencode.json` configuration file:
 
-### For Standard Installation (npm)
+### For Automatic Installation (Hands-free)
+
+Just add the package directly with the desired version tag. OpenCode will download and resolve it automatically from npm:
+
+```jsonc
+{
+  "plugin": [
+    // ...your existing plugins...
+    "opencode-agy-bridge@0.1.0/plugin"
+  ],
+  "provider": {
+    // ...your existing providers...
+    "agy": {
+      "npm": "opencode-agy-bridge@0.1.0",
+      "name": "Google Antigravity (via agy CLI)",
+      "options": {
+        "binary": "agy",
+        "timeoutMs": 300000
+      },
+      "models": {
+        "antigravity": {
+          "name": "Antigravity (server-selected Gemini)"
+        }
+      }
+    }
+  }
+}
+```
+
+### For Manual Global Installation
 
 ```jsonc
 {
