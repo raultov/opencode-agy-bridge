@@ -8,6 +8,9 @@
     ".": "./dist/provider.js",
     "./plugin": "./dist/plugin.js"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "bun test"
