@@ -77,7 +77,7 @@ Just add the package directly with the desired version tag. OpenCode will downlo
 {
   "plugin": [
     // ...your existing plugins...
-    "opencode-agy-bridge@0.2.0"
+    "opencode-agy-bridge@0.2.1"
   ],
   "provider": {
     // ...your existing providers...
@@ -206,7 +206,7 @@ npm test
 The project includes two GitHub Actions workflows:
 
 - **CI (`ci.yml`):** Runs on push and pull requests to `main` or `master` to compile the project and execute all unit tests using Bun.
-- **Release (`release.yml`):** Runs automatically when a new version tag matching `v*` (e.g., `v0.2.0`) is pushed to the repository. It automatically installs dependencies, builds, tests, and publishes the package to the public npm registry.
+- **Release (`release.yml`):** Runs automatically when a new version tag matching `v*` (e.g., `v0.2.1`) is pushed to the repository. It automatically installs dependencies, builds, tests, and publishes the package to the public npm registry.
 
 Note that both `npm` and `pnpm` share the same public registry (`registry.npmjs.org`), so a single publish step makes the package installable by both package managers.
 
