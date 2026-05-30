@@ -23,139 +23,91 @@ opencode TUI
 
 ## Installation
 
-### 1. Automatic Installation (Recommended)
+### Automatic (hands-free)
 
-If you are using OpenCode's built-in plugin manager, **you do not need to run any commands** in your terminal. OpenCode can automatically fetch and install the package from npm if you specify the package name with its version in your `opencode.json` configuration file.
+Add the package with its version to `~/.config/opencode/opencode.json`. OpenCode will download and resolve it from npm automatically — no terminal commands needed.
 
-See the [Configuration](#configuration) section below for details.
-
-### 2. Manual Global Installation
-
-If you prefer to install it globally yourself using a package manager:
+### Manual global install
 
 ```bash
-# Using npm
 npm install -g opencode-agy-bridge
-
-# Using Bun
-bun install -g opencode-agy-bridge
-
-# Using pnpm
-pnpm add -g opencode-agy-bridge
+# or: bun install -g opencode-agy-bridge
+# or: pnpm add -g opencode-agy-bridge
 ```
 
-### 3. Local Development Installation
-
-If you prefer to build from source:
+### Build from source
 
 ```bash
 git clone https://github.com/raultov/opencode-agy-bridge.git
 cd opencode-agy-bridge
-
-# Using Bun (recommended)
-bun install
-bun run build
-bun test       # verify all tests pass
-
-# Or using pnpm/npm
-pnpm install && pnpm run build && pnpm test
+bun install && bun run build && bun test
 ```
-
-## Features
-
-- **Robust Delta Extraction:** Automatically normalizes `\r\n` (CRLF) and `\n` (LF) line endings, tolerates trailing whitespace/newline differences, and implements suffix-based alignment to support seamless recovery during context window truncation.
 
 ## Configuration
 
-Add the plugin and provider to your `~/.config/opencode/opencode.json` configuration file:
+Add the plugin and provider to `~/.config/opencode/opencode.json`.
 
-### For Automatic Installation (Hands-free)
+> The **node.js** path represents a **package** (directory or npm package name), not a `.js` file. Pointing `"npm"` at a `.js` file will cause a `ProviderInitError` because opencode internally appends `/provider` to resolve the exports map.
 
-Just add the package directly with the desired version tag. OpenCode will download and resolve it automatically from npm:
+### Recommended: automatic from npm
 
 ```jsonc
 {
   "plugin": [
-    // ...your existing plugins...
-    "opencode-agy-bridge@0.2.2"
+    "opencode-agy-bridge@0.2.3"
   ],
   "provider": {
-    // ...your existing providers...
     "agy": {
-      "npm": "opencode-agy-bridge/provider",
+      "npm": "opencode-agy-bridge",
       "name": "Google Antigravity (via agy CLI)",
-      "options": {
-        "binary": "agy",
-        "timeoutMs": 300000
-      },
-      "models": {
-        "antigravity": {
-          "name": "Antigravity (server-selected Gemini)"
-        }
-      }
+      "options": { "binary": "agy", "timeoutMs": 300000 },
+      "models": { "antigravity": { "name": "Antigravity (server-selected Gemini)" } }
     }
   }
 }
 ```
 
-### For Manual Global Installation
+### Using npm global install path
 
 ```jsonc
 {
   "plugin": [
-    // ...your existing plugins...
     "opencode-agy-bridge"
   ],
   "provider": {
-    // ...your existing providers...
     "agy": {
-      "npm": "opencode-agy-bridge/provider",
+      "npm": "opencode-agy-bridge",
       "name": "Google Antigravity (via agy CLI)",
-      "options": {
-        "binary": "agy",
-        "timeoutMs": 300000
-      },
-      "models": {
-        "antigravity": {
-          "name": "Antigravity (server-selected Gemini)"
-        }
-      }
+      "options": { "binary": "agy", "timeoutMs": 300000 },
+      "models": { "antigravity": { "name": "Antigravity (server-selected Gemini)" } }
     }
   }
 }
 ```
 
-> [!NOTE]
-> If OpenCode has trouble resolving the global module name directly, you can replace the module names with their absolute paths pointing to your global `node_modules` folder (e.g., `"/usr/local/lib/node_modules/opencode-agy-bridge/dist/plugin.js"` for the plugin and `"/usr/local/lib/node_modules/opencode-agy-bridge/dist/provider.js"` for the provider).
-
-### For Local Development / Manual Installation
+### Local development (absolute paths)
 
 ```jsonc
 {
   "plugin": [
-    // ...your existing plugins...
     "/home/USER/workspace/opencode-agy-bridge/dist/plugin.js"
   ],
   "provider": {
-    // ...your existing providers...
     "agy": {
       "npm": "/home/USER/workspace/opencode-agy-bridge",
       "name": "Google Antigravity (via agy CLI)",
-      "options": {
-        "binary": "agy",
-        "timeoutMs": 300000
-      },
-      "models": {
-        "antigravity": {
-          "name": "Antigravity (server-selected Gemini)"
-        }
-      }
+      "options": { "binary": "agy", "timeoutMs": 300000 },
+      "models": { "antigravity": { "name": "Antigravity (server-selected Gemini)" } }
     }
   }
 }
 ```
 
 Then restart OpenCode and run `/model` → select `agy/antigravity`.
+
+## Features
+
+- **Robust Delta Extraction:** Automatically normalizes `\r\n` (CRLF) and `\n` (LF) line endings, tolerates trailing whitespace/newline differences, and implements suffix-based alignment to support seamless recovery during context window truncation.
 
 ## Known limitations
 
@@ -183,35 +135,17 @@ src/
 
 ## Development
 
-Using **Bun**:
 ```bash
-bun run build
-bun test
-```
-
-Using **pnpm**:
-```bash
-pnpm run build
-pnpm test
-```
-
-Using **npm**:
-```bash
-npm run build
-npm test
+bun run build   # compile TypeScript
+bun test        # run test suite
 ```
 
 ## CI/CD (GitHub Actions)
 
-The project includes two GitHub Actions workflows:
-
-- **CI (`ci.yml`):** Runs on push and pull requests to `main` or `master` to compile the project and execute all unit tests using Bun.
-- **Release (`release.yml`):** Runs automatically when a new version tag matching `v*` (e.g., `v0.2.2`) is pushed to the repository. It automatically installs dependencies, builds, tests, and publishes the package to the public npm registry.
-
-Note that both `npm` and `pnpm` share the same public registry (`registry.npmjs.org`), so a single publish step makes the package installable by both package managers.
+- **CI (`ci.yml`):** Runs on push and pull requests to `main` — compiles and runs all tests.
+- **Release (`release.yml`):** Runs on `v*` tags — builds, tests, and publishes to npm.
 
 ### Setup
 
-To enable automated releases:
-1. Generate an Access Token with publish permissions on [npmjs.com](https://www.npmjs.com/).
-2. Add the token as a repository secret named `NPM_TOKEN` in your GitHub repository settings under **Settings** → **Secrets and variables** → **Actions**.
+1. Generate a Granular Access Token on [npmjs.com](https://www.npmjs.com/) with **Bypass 2FA** enabled.
+2. Add it as repository secret `NPM_TOKEN` in GitHub **Settings → Secrets and variables → Actions**.

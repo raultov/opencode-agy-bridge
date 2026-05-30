@@ -1,13 +1,14 @@
 {
   "name": "opencode-agy-bridge",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "type": "module",
-  "main": "./plugin.js",
+  "main": "./dist/provider.js",
   "license": "MIT",
   "description": "OpenCode plugin + provider that routes LLM prompts to agy (Google Antigravity CLI)",
   "exports": {
-    ".": "./dist/plugin.js",
-    "./provider": "./dist/provider.js"
+    ".": "./dist/provider.js",
+    "./provider": "./dist/provider.js",
+    "./plugin": "./dist/plugin.js"
   },
   "files": [
     "dist",
@@ -18,10 +19,16 @@
     "build": "tsc",
     "test": "bun test"
   },
-  "dependencies": {
+  "peerDependencies": {
     "@ai-sdk/provider": "^3.0.0"
   },
+  "peerDependenciesMeta": {
+    "@ai-sdk/provider": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@ai-sdk/provider": "^3.0.0",
     "@opencode-ai/plugin": "^1.15.12",
     "@types/bun": "latest",
     "typescript": "^5.8.0"

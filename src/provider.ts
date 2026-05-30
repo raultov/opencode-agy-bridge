@@ -4,6 +4,8 @@ import type {
   LanguageModelV2CallOptions,
   LanguageModelV2StreamPart,
   LanguageModelV2CallWarning,
+  EmbeddingModelV2,
+  ImageModelV2,
 } from "@ai-sdk/provider";
 import { runAgy } from "./agy-runner.js";
 import { snapshot, findNewConversation, defaultConversationsDir } from "./conversation-tracker.js";
@@ -85,8 +87,6 @@ function buildLanguageModel(
   const conversationsDir = opts.conversationsDir ?? defaultConversationsDir();
 
   const doGenerate = async (callOpts: LanguageModelV2CallOptions) => {
-    // Use the stable OpenCode session ID injected via plugin chat.headers hook.
-    // Falls back to providerMetadata or a random UUID for standalone/testing.
     const sessionId =
       (callOpts.headers?.["x-agy-session-id"] as string) ??
       (callOpts.providerOptions?.agy as Record<string, unknown> | undefined)
@@ -109,14 +109,14 @@ function buildLanguageModel(
     try {
       before = conversationId ? null : await snapshot(conversationsDir);
 
-      // Only send new messages when conversation is already bound.
-      // agy preserves context internally via --conversation, so sending
-      // the full history each turn confuses it and causes hallucination.
       const newMessages = conversationId
         ? callOpts.prompt.slice(processedMessages)
         : callOpts.prompt;
 
       const prompt = flattenPrompt(newMessages);
+
+      console.error("[agy-bridge] doGenerate session=%s conv=%s msgs=%d/%d",
+        sessionId.slice(0,8), conversationId?.slice(0,8) ?? "-", newMessages.length, callOpts.prompt.length);
 
       const result = await runAgy({
         prompt,
@@ -261,27 +261,58 @@ function buildLanguageModel(
   };
 }
 
+let factoryInitWarned = false;
+
+function unsupportedEmbeddingModel(modelId: string): EmbeddingModelV2<string> {
+  return {
+    specificationVersion: "v2",
+    provider: "agy",
+    modelId,
+    maxEmbeddingsPerCall: 0,
+    supportsParallelCalls: false,
+    doEmbed: async () => {
+      throw new Error("agy bridge does not support text embeddings");
+    },
+  };
+}
+
+function unsupportedImageModel(modelId: string): ImageModelV2 {
+  return {
+    specificationVersion: "v2",
+    provider: "agy",
+    modelId,
+    maxImagesPerCall: 0,
+    doGenerate: async () => {
+      throw new Error("agy bridge does not support image generation");
+    },
+  };
+}
+
 export function createAgyProvider(
   opts?: AgyProviderOptions,
 ): ProviderV2 {
   const resolvedOpts = opts ?? {};
 
-  const languageModel = (modelId: string): LanguageModelV2 =>
-    buildLanguageModel(modelId, resolvedOpts);
+  if (!factoryInitWarned) {
+    factoryInitWarned = true;
+    console.error("[agy-bridge] createAgyProvider called");
+  }
+
+  const languageModel = (modelId: string): LanguageModelV2 => {
+    console.error("[agy-bridge] languageModel called for modelId=%s", modelId);
+    return buildLanguageModel(modelId, resolvedOpts);
+  };
 
   return {
     languageModel,
-    textEmbeddingModel(): never {
-      throw new Error("agy bridge does not support text embeddings");
-    },
-    imageModel(): never {
-      throw new Error("agy bridge does not support image generation");
-    },
+    textEmbeddingModel: (modelId: string) => unsupportedEmbeddingModel(modelId),
+    imageModel: (modelId: string) => unsupportedImageModel(modelId),
   };
 }
 
 export default function defaultFactory(
   opts?: AgyProviderOptions,
 ): ProviderV2 {
+  console.error("[agy-bridge] defaultFactory called");
   return createAgyProvider(opts);
 }
