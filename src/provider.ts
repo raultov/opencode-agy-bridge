@@ -115,9 +115,6 @@ function buildLanguageModel(
 
       const prompt = flattenPrompt(newMessages);
 
-      console.error("[agy-bridge] doGenerate session=%s conv=%s msgs=%d/%d",
-        sessionId.slice(0,8), conversationId?.slice(0,8) ?? "-", newMessages.length, callOpts.prompt.length);
-
       const result = await runAgy({
         prompt,
         cwd: process.cwd(),
@@ -261,8 +258,6 @@ function buildLanguageModel(
   };
 }
 
-let factoryInitWarned = false;
-
 function unsupportedEmbeddingModel(modelId: string): EmbeddingModelV2<string> {
   return {
     specificationVersion: "v2",
@@ -290,31 +285,24 @@ function unsupportedImageModel(modelId: string): ImageModelV2 {
 
 export function createAgyProvider(
   opts?: AgyProviderOptions,
-): ProviderV2 & { (modelId: string): LanguageModelV2; provider: string } {
+): ProviderV2 & { provider: string } {
   const resolvedOpts = opts ?? {};
 
-  if (!factoryInitWarned) {
-    factoryInitWarned = true;
-    console.error("[agy-bridge] createAgyProvider called");
-  }
-
-  const factory = (modelId: string): LanguageModelV2 => {
-    console.error("[agy-bridge] languageModel called for modelId=%s", modelId);
+  const languageModel = (modelId: string): LanguageModelV2 => {
     return buildLanguageModel(modelId, resolvedOpts);
   };
 
-  factory.provider = "agy";
-  factory.specificationVersion = "v2" as const;
-  factory.languageModel = factory;
-  factory.textEmbeddingModel = (modelId: string) => unsupportedEmbeddingModel(modelId);
-  factory.imageModel = (modelId: string) => unsupportedImageModel(modelId);
-
-  return factory;
+  return {
+    specificationVersion: "v2" as const,
+    provider: "agy",
+    languageModel,
+    textEmbeddingModel: (modelId: string) => unsupportedEmbeddingModel(modelId),
+    imageModel: (modelId: string) => unsupportedImageModel(modelId),
+  } as any;
 }
 
 export default function defaultFactory(
   opts?: AgyProviderOptions,
 ): ProviderV2 {
-  console.error("[agy-bridge] defaultFactory called");
   return createAgyProvider(opts) as ProviderV2;
 }
