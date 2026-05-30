@@ -82,7 +82,7 @@ Just add the package directly with the desired version tag. OpenCode will downlo
   "provider": {
     // ...your existing providers...
     "agy": {
-      "npm": "opencode-agy-bridge@0.2.0/provider",
+      "npm": "opencode-agy-bridge/provider",
       "name": "Google Antigravity (via agy CLI)",
       "options": {
         "binary": "agy",
