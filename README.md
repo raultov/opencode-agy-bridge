@@ -21,10 +21,29 @@ opencode TUI
 2. **Node.js ≥ 18** or **Bun ≥ 1.0**.
 3. **OpenCode** `>= 1.15.x` (uses Vercel AI SDK v3).
 
-## Installation (local development)
+## Installation
+
+### 1. Standard Installation (Recommended)
+
+Install the bridge globally using your preferred package manager:
 
 ```bash
-git clone <this-repo>
+# Using npm
+npm install -g opencode-agy-bridge
+
+# Using Bun
+bun install -g opencode-agy-bridge
+
+# Using pnpm
+pnpm add -g opencode-agy-bridge
+```
+
+### 2. Manual / Local Development Installation
+
+If you prefer to build from source:
+
+```bash
+git clone https://github.com/raultov/opencode-agy-bridge.git
 cd opencode-agy-bridge
 
 # Using Bun (recommended)
@@ -32,15 +51,8 @@ bun install
 bun run build
 bun test       # verify 42 tests pass
 
-# Or using pnpm
-pnpm install
-pnpm run build
-pnpm test
-
-# Or using npm
-npm install
-npm run build
-npm test
+# Or using pnpm/npm
+pnpm install && pnpm run build && pnpm test
 ```
 
 ## Features
@@ -49,7 +61,39 @@ npm test
 
 ## Configuration
 
-Add to your `~/.config/opencode/opencode.json`:
+Add the plugin and provider to your `~/.config/opencode/opencode.json` configuration file:
+
+### For Standard Installation (npm)
+
+```jsonc
+{
+  "plugin": [
+    // ...your existing plugins...
+    "opencode-agy-bridge/plugin"
+  ],
+  "provider": {
+    // ...your existing providers...
+    "agy": {
+      "npm": "opencode-agy-bridge",
+      "name": "Google Antigravity (via agy CLI)",
+      "options": {
+        "binary": "agy",
+        "timeoutMs": 300000
+      },
+      "models": {
+        "antigravity": {
+          "name": "Antigravity (server-selected Gemini)"
+        }
+      }
+    }
+  }
+}
+```
+
+> [!NOTE]
+> If OpenCode has trouble resolving the global module name directly, you can replace the module names with their absolute paths pointing to your global `node_modules` folder (e.g., `"/usr/local/lib/node_modules/opencode-agy-bridge/dist/plugin.js"` for the plugin and `"/usr/local/lib/node_modules/opencode-agy-bridge"` for the provider).
+
+### For Local Development / Manual Installation
 
 ```jsonc
 {
@@ -127,7 +171,7 @@ npm test
 The project includes two GitHub Actions workflows:
 
 - **CI (`ci.yml`):** Runs on push and pull requests to `main` or `master` to compile the project and execute all unit tests using Bun.
-- **Release (`release.yml`):** Runs when a new GitHub Release is created. It automatically installs dependencies, builds, tests, and publishes the package to the public npm registry.
+- **Release (`release.yml`):** Runs automatically when a new version tag matching `v*` (e.g., `v0.1.0`) is pushed to the repository. It automatically installs dependencies, builds, tests, and publishes the package to the public npm registry.
 
 Note that both `npm` and `pnpm` share the same public registry (`registry.npmjs.org`), so a single publish step makes the package installable by both package managers.
 
