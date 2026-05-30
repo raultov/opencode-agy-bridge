@@ -290,7 +290,7 @@ function unsupportedImageModel(modelId: string): ImageModelV2 {
 
 export function createAgyProvider(
   opts?: AgyProviderOptions,
-): ProviderV2 {
+): ProviderV2 & { (modelId: string): LanguageModelV2; provider: string } {
   const resolvedOpts = opts ?? {};
 
   if (!factoryInitWarned) {
@@ -298,21 +298,23 @@ export function createAgyProvider(
     console.error("[agy-bridge] createAgyProvider called");
   }
 
-  const languageModel = (modelId: string): LanguageModelV2 => {
+  const factory = (modelId: string): LanguageModelV2 => {
     console.error("[agy-bridge] languageModel called for modelId=%s", modelId);
     return buildLanguageModel(modelId, resolvedOpts);
   };
 
-  return {
-    languageModel,
-    textEmbeddingModel: (modelId: string) => unsupportedEmbeddingModel(modelId),
-    imageModel: (modelId: string) => unsupportedImageModel(modelId),
-  };
+  factory.provider = "agy";
+  factory.specificationVersion = "v2" as const;
+  factory.languageModel = factory;
+  factory.textEmbeddingModel = (modelId: string) => unsupportedEmbeddingModel(modelId);
+  factory.imageModel = (modelId: string) => unsupportedImageModel(modelId);
+
+  return factory;
 }
 
 export default function defaultFactory(
   opts?: AgyProviderOptions,
 ): ProviderV2 {
   console.error("[agy-bridge] defaultFactory called");
-  return createAgyProvider(opts);
+  return createAgyProvider(opts) as ProviderV2;
 }

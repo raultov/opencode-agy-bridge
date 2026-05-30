@@ -1,6 +1,6 @@
 {
   "name": "opencode-agy-bridge",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "type": "module",
   "main": "./dist/provider.js",
   "license": "MIT",
@@ -32,5 +32,9 @@
     "@opencode-ai/plugin": "^1.15.12",
     "@types/bun": "latest",
     "typescript": "^5.8.0"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^3.0.67",
+    "zod": "^3.25.0-beta.20250519T094321"
   }
 }
