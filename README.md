@@ -54,36 +54,20 @@ Add the plugin and provider to `~/.config/opencode/opencode.json`.
 ```jsonc
 {
   "plugin": [
-    "opencode-agy-bridge@0.2.7"
+    "opencode-agy-bridge@0.2.8"
   ],
   "provider": {
     "agy": {
       "npm": "opencode-agy-bridge",
       "name": "Google Antigravity (via agy CLI)",
       "options": { "binary": "agy", "timeoutMs": 300000 },
-      "models": { "antigravity": { "name": "Antigravity (server-selected Gemini)" } }
+      "models": { "antigravity": { "name": "Antigravity (Gemini)" } }
     }
   }
 }
 ```
 
-### Using npm global install path
-
-```jsonc
-{
-  "plugin": [
-    "opencode-agy-bridge"
-  ],
-  "provider": {
-    "agy": {
-      "npm": "opencode-agy-bridge",
-      "name": "Google Antigravity (via agy CLI)",
-      "options": { "binary": "agy", "timeoutMs": 300000 },
-      "models": { "antigravity": { "name": "Antigravity (server-selected Gemini)" } }
-    }
-  }
-}
-```
+> **Always pin a fixed version** in the `plugin` array (e.g. `@0.2.8`). Do **not** omit the version and do **not** use bare package names or `@latest` — new releases may contain bugs or breaking changes that would be pulled silently on the next OpenCode restart.
 
 ### Local development (absolute paths)
 
@@ -121,6 +105,35 @@ Then restart OpenCode and run `/model` → select `agy/antigravity`.
 | **Images/file parts omitted** | OpenCode messages with image/file content parts are skipped with a warning — `agy` CLI does not support them. |
 | **Conversation binding heuristic** | The bridge infers `conversation_id` by diffing `~/.gemini/antigravity-cli/conversations/*.pb` before/after each turn. If multiple `.pb` files appear simultaneously, binding is refused and each turn runs in single-turn mode. |
 
+## Installation issues in corporate environments
+
+If you get `ProviderInitError` after configuring the bridge, it may be caused by an **OpenCode bug** where the provider package download fails silently (no error logged) instead of surfacing the underlying problem. This is commonly triggered by:
+
+- **Corporate npm registry proxies** (Nexus, Artifactory, Verdaccio, JFrog — any `registry` configured in `~/.npmrc`) that enforce allowlists, security scans, or maturity policies on newly published packages.
+- **Newly published versions** that haven't been cached or approved by the corporate proxy yet.
+
+**Diagnostic:** check `~/.cache/opencode/packages/opencode-agy-bridge@<version>/`. If the directory is empty or missing files despite a successful OpenCode startup, the proxy silently blocked the download.
+
+**Workaround:** temporarily comment out the `registry` line in `~/.npmrc`, restart OpenCode so it downloads the package from the public npm registry, then restore the corporate registry setting. The cached package in `~/.cache/opencode/packages/` will continue to work.
+
+**Long-term fix:** ask your registry administrator to add `opencode-agy-bridge` to the package allowlist.
+
+## Roadmap
+
+### v0.x — Current
+
+- **Unified plugin + provider entry point** — single npm package that OpenCode auto-detects as both plugin and provider.
+- **Robust delta extraction** — end-of-line normalization (`\r\n` ↔ `\n`), whitespace-tolerant alignment, suffix fallback for context window truncation recovery.
+- **Session persistence across restarts** — conversation state survives OpenCode restarts via `~/.opencode-agy-bridge/sessions.json`.
+- **Conversation binding via `.pb` file diffing** — automatically discovers the `conversation_id` created by `agy` so multi-turn conversations work seamlessly.
+- **Global binding lock** — prevents race conditions when multiple OpenCode instances run concurrently.
+
+### Future — Real streaming (see [`specs/docs/STREAMING_RESEARCH.md`](specs/docs/STREAMING_RESEARCH.md))
+
+The current bridge relies on `agy --print`, which buffers the full response before emitting it. Investigation has confirmed that the Antigravity **IDE binary** hosts a Connect/gRPC-JSON server (`language_server`) with streaming RPCs (`StreamCascadeReactiveUpdates`, `StreamCascadeSummariesReactiveUpdates`, `StreamAgentStateUpdates`) that deliver token-by-token output.
+
+A future v2 could bypass `agy --print` entirely and speak directly to a language_server instance (either the one the IDE already runs, or one the plugin spawns itself), providing real progressive streaming instead of single-batch `text-delta` delivery. Estimated effort: ~2 weeks. Blocked pending proto reverse-engineering and ToS review.
+
 ## Project structure
 
 ```
@@ -140,12 +153,4 @@ bun run build   # compile TypeScript
 bun test        # run test suite
 ```
 
-## CI/CD (GitHub Actions)
 
-- **CI (`ci.yml`):** Runs on push and pull requests to `main` — compiles and runs all tests.
-- **Release (`release.yml`):** Runs on `v*` tags — builds, tests, and publishes to npm.
-
-### Setup
-
-1. Generate a Granular Access Token on [npmjs.com](https://www.npmjs.com/) with **Bypass 2FA** enabled.
-2. Add it as repository secret `NPM_TOKEN` in GitHub **Settings → Secrets and variables → Actions**.
