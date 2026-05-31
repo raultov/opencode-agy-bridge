@@ -2,6 +2,8 @@ import { createAgyProvider } from "./provider.js";
 import type { ProviderV2 } from "@ai-sdk/provider";
 import type { AgyProviderOptions } from "./provider.js";
 
+export { createAgyProvider } from "./provider.js";
+
 export default function unified(input?: any): any {
   if (input && typeof input === "object" && "client" in input) {
     return {

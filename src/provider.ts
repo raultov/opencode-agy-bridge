@@ -282,20 +282,20 @@ function unsupportedImageModel(modelId: string): ImageModelV2 {
 
 export function createAgyProvider(
   opts?: AgyProviderOptions,
-): ProviderV2 & { provider: string } {
+): ProviderV2 & { (modelId: string): LanguageModelV2; provider: string } {
   const resolvedOpts = opts ?? {};
 
-  const languageModel = (modelId: string): LanguageModelV2 => {
+  const factory = (modelId: string): LanguageModelV2 => {
     return buildLanguageModel(modelId, resolvedOpts);
   };
 
-  return {
-    specificationVersion: "v2" as const,
-    provider: "agy",
-    languageModel,
-    textEmbeddingModel: (modelId: string) => unsupportedEmbeddingModel(modelId),
-    imageModel: (modelId: string) => unsupportedImageModel(modelId),
-  } as any;
+  factory.provider = "agy";
+  factory.specificationVersion = "v2" as const;
+  factory.languageModel = factory;
+  factory.textEmbeddingModel = (modelId: string) => unsupportedEmbeddingModel(modelId);
+  factory.imageModel = (modelId: string) => unsupportedImageModel(modelId);
+
+  return factory as ProviderV2 & { (modelId: string): LanguageModelV2; provider: string };
 }
 
 export default function defaultFactory(
