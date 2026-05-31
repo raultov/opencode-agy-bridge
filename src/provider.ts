@@ -73,9 +73,6 @@ export function extractDelta(
     }
   }
 
-  console.error(
-    "[agy-bridge] WARN: agy stdout was not append-only; sending full output and resetting delta baseline",
-  );
   return fullText;
 }
 

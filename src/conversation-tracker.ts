@@ -38,9 +38,6 @@ export async function findNewConversation(
   }
 
   if (created.length > 1) {
-    console.error(
-      "[agy-bridge] WARN: multiple new agy conversation files appeared; refusing to bind",
-    );
     return null;
   }
 

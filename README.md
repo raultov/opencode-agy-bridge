@@ -54,7 +54,7 @@ Add the plugin and provider to `~/.config/opencode/opencode.json`.
 ```jsonc
 {
   "plugin": [
-    "opencode-agy-bridge@0.2.6"
+    "opencode-agy-bridge@0.2.7"
   ],
   "provider": {
     "agy": {

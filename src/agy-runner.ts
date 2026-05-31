@@ -61,7 +61,6 @@ export async function runAgy(input: RunAgyInput): Promise<RunAgyResult> {
       const exitCode = code ?? 1;
 
       if (stderr.trim()) {
-        console.error("[agy-bridge] agy stderr:", stderr.trimEnd());
       }
 
       if (exitCode !== 0 && !stdout.trim()) {
